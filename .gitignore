@@ -106,3 +106,8 @@ venv.bak/
 # PyCharm
 .idea
 .idea/
+
+# Project
+checkpoint
+checkpoint/
+*.pth
