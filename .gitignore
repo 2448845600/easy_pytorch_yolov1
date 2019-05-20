@@ -111,3 +111,5 @@ venv.bak/
 checkpoint
 checkpoint/
 *.pth
+test_images
+test_images/
