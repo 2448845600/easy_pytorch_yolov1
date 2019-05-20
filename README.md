@@ -1,3 +1,6 @@
+# Easy_Pytorch_YOLOv1
+施工中
+
 ## IOU
 [![EOF7vt.png](https://s2.ax1x.com/2019/05/18/EOF7vt.png)](https://imgchr.com/i/EOF7vt)
 
@@ -31,6 +34,10 @@ loss.py文件把loss分成几部分，则有四种情况：
 
 ## Data
 voc的数据格式是xml，转换为txt，转换代码在data目录下。定义YOLODataset。
+
+## Todo
+- [ ] 训练
+- [ ] 评估函数
 
 
 
