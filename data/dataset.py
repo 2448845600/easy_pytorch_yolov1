@@ -62,7 +62,7 @@ class YOLODataset(data.Dataset):
         # if self.train:
         #     img, boxes = self.random_flip(img, boxes)
 
-        h, w, _ = img.shape()
+        h, w, _ = img.shape
         boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)  # x, y, w, h, 除以图片的长宽
         img = self.BGR2RGB(img)
         img = self.subMean(img, self.mean)
