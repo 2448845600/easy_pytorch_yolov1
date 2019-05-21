@@ -32,7 +32,7 @@ class YOLOLoss(nn.Module):
         noobj_mask = noobj_mask.unsqueeze(-1).expand_as(target)
 
         # get coord prediction and target
-        coord_pred = predict[coord_mask].view(-1, 30)
+        coord_pred = predict.view(coord_mask.size())[coord_mask].view(-1, 30)
         coord_box_pred = coord_pred[:, :10].contiguous().view(-1, 5)
         coord_class_pred = coord_pred[:, 10:]
 
@@ -41,7 +41,7 @@ class YOLOLoss(nn.Module):
         coord_class_target = coord_target[:, 10:]
 
         # get no object prediction and target, and compute noobj_loss
-        noobj_pred = predict[noobj_mask].view(-1, 30)
+        noobj_pred = predict.view(noobj_mask.size())[noobj_mask].view(-1, 30)
         noobj_target = target[noobj_mask].view(-1, 30)
         noobj_pred_mask = torch.cuda.ByteTensor(noobj_pred.size())
         noobj_pred_mask.zero_()
@@ -49,7 +49,7 @@ class YOLOLoss(nn.Module):
         noobj_pred_mask[:, 9] = 1
         noobj_pred_c = noobj_pred[noobj_pred_mask]
         noobj_target_c = noobj_target[noobj_pred_mask]
-        noobj_loss = F.mse_loss(noobj_pred_c, noobj_target_c, size_average=False)
+        noobj_loss = F.mse_loss(noobj_pred_c, noobj_target_c, reduction='sum')
 
         # compute obj loss
         coord_response_mask = torch.cuda.ByteTensor(coord_box_target.size())
@@ -72,32 +72,32 @@ class YOLOLoss(nn.Module):
             box2_xyxy[:, :2] = box2[:, :2] - 0.5 * box2[:, 2:4]
             box2_xyxy[:, 2:4] = box2[:, :2] + 0.5 * box2[:, 2:4]
 
-            iou = compute_iou(box1_xyxy, box2_xyxy)  # iou: tensor([2, 1])
+            iou = compute_iou(box1_xyxy[:, :4], box2_xyxy[:, :4])  # iou: tensor([2, 1])
             max_iou, max_index = iou.max(0)
             max_index = max_index.data.cuda()
             coord_response_mask[i + max_index] = 1
             coord_not_response_mask[i + 1 - max_index] = 1
-            box_target_iou[i + max_index, torch.LongTensor([4]).cuda()] = (max_iou).date.cuda()
+            box_target_iou[i + max_index, torch.LongTensor([4]).cuda()] = (max_iou).data.cuda()
         box_target_iou = Variable(box_target_iou).cuda()
 
         # response loss
         coord_box_pred_response = coord_box_pred[coord_response_mask].view(-1, 5)
         box_target_response_iou = box_target_iou[coord_response_mask].view(-1, 5)  # 计算confid loss时，target confid都是1
         box_target_response = coord_box_target[coord_response_mask].view(-1, 5)
-        contain_loss = F.mse_loss(coord_box_pred_response[:, 4], box_target_response_iou[:, 4], size_average=False)
-        loc_loss = F.mse_loss(coord_box_pred_response[:, :2], box_target_response[:, :2], size_average=False) + \
+        contain_loss = F.mse_loss(coord_box_pred_response[:, 4], box_target_response_iou[:, 4], reduction='sum')
+        loc_loss = F.mse_loss(coord_box_pred_response[:, :2], box_target_response[:, :2], reduction='sum') + \
                    F.mse_loss(torch.sqrt(coord_box_pred_response[:, 2:4]), torch.sqrt(box_target_response[:, 2:4]),
-                              size_average=False)
+                              reduction='sum')
 
         # not response loss
         coord_box_pred_not_response = coord_box_pred[coord_not_response_mask].view(-1, 5)
         box_target_not_response = coord_box_target[coord_not_response_mask].view(-1, 5)
         box_target_not_response[:, 4] = 0
         not_contain_loss = F.mse_loss(coord_box_pred_not_response[:, 4], box_target_not_response[:, 4],
-                                      size_average=False)
+                                      reduction='sum')
 
         # class loss
-        class_loss = F.mse_loss(coord_class_pred, coord_class_target, size_average=False)
+        class_loss = F.mse_loss(coord_class_pred, coord_class_target, reduction='sum')
 
         loss = (self.l_coord * loc_loss + 2 * contain_loss + not_contain_loss
                 + self.l_noobj * noobj_loss + class_loss) / N
