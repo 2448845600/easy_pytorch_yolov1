@@ -70,7 +70,7 @@ class YOLODataset(data.Dataset):
         target = self.encoder(boxes, labels)  # 7x7x30
         for t in self.transform:  # 图像转化
             img = t(img)
-        return target
+        return img, target
 
     def __len__(self):
         return self.num_samples
