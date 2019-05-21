@@ -10,7 +10,7 @@ class DefaultConfig():
     test_img_dir = '/home/lee/data1/COOLA/COOLA.CV/easy_pytorch_yolov1/test_images/a.jpg'
     result_img_dir = '/home/lee/data1/COOLA/COOLA.CV/easy_pytorch_yolov1/test_images/result_a.jpg'
 
-    batch_size = 32  # batch size
+    batch_size = 1  # batch size
     use_gpu = True  # user GPU or not
     num_workers = 4  # how many workers for loading data  加载数据时的线程
     print_freq = 20  # print info every N batch
