@@ -11,8 +11,8 @@ class YOLO(nn.Module):
     def __init__(self, num_classes=20, init_weights=True):
         super(YOLO, self).__init__()
         self.basic_net = vgg16_bn().features
+        self.avgpool = nn.AdaptiveAvgPool2d((7, 7)) # 自适应平均池化
         self.detector_head = nn.Sequential(
-            nn.AdaptiveAvgPool2d((7, 7)),  # 自适应平均池化
             nn.Linear(7 * 7 * 512, 4096),
             nn.ReLU(True),
             nn.Dropout(),
@@ -27,8 +27,10 @@ class YOLO(nn.Module):
                 layer.bias.data.zero_()
 
     def forward(self, input):
-        features = self.basic_net(input)
-        output = self.detector_head(features)
+        x = self.basic_net(input)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        output = self.detector_head(x)
         return output
 
 

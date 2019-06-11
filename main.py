@@ -15,7 +15,7 @@ from model.loss import YOLOLoss
 
 
 def train():
-    vis = Visualizer(conf.env)
+    # vis = Visualizer(conf.env)
 
     print("==============================\n网络结构  开始 \n==============================")
     yolo = YOLO()
@@ -72,15 +72,15 @@ def train():
                 images, target = images.cuda(), target.cuda()
             pred = yolo(images)
             loss = criterion(pred, target)
-            total_loss += loss.data[0]
+            total_loss += loss.data
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             if (i + 1) % conf.print_freq == 0:
                 print('在训练集上：当前epoch为 [%d/%d], Iter [%d/%d] 当前batch损失为: %.4f, 当前epoch到目前为止平均损失为: %.4f'
-                      % (epoch + 1, conf.num_epochs, i + 1, len(train_loader), loss.data[0], total_loss / (i + 1)))
+                      % (epoch + 1, conf.num_epochs, i + 1, len(train_loader), loss.data, total_loss / (i + 1)))
                 # 画出训练集的平均损失
-                vis.plot_train_val(loss_train=total_loss / (i + 1))
+                # vis.plot_train_val(loss_train=total_loss / (i + 1))
         torch.save(yolo.state_dict(), conf.current_epoch_model_path)
 
         print("----------\n训练  对当前train做验证\n----------")
@@ -95,7 +95,7 @@ def train():
             loss = criterion(pred, target)
             validation_loss += loss.data[0]
         validation_loss /= len(test_loader)
-        vis.plot_train_val(loss_val=validation_loss)
+        # vis.plot_train_val(loss_val=validation_loss)
         if best_test_loss > validation_loss:
             best_test_loss = validation_loss
             print('当前得到最好的验证集的平均损失为  %.5f' % best_test_loss)
