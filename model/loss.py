@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.ops import nms
 from torch.autograd import Variable
 
 from util.iou import compute_iou
@@ -72,7 +73,8 @@ class YOLOLoss(nn.Module):
             box2_xyxy[:, :2] = box2[:, :2] - 0.5 * box2[:, 2:4]
             box2_xyxy[:, 2:4] = box2[:, :2] + 0.5 * box2[:, 2:4]
 
-            iou = compute_iou(box1_xyxy, box2_xyxy)  # iou: tensor([2, 1])
+            # iou = compute_iou(box1_xyxy, box2_xyxy)  # iou: tensor([2, 1])
+            iou = nms(box1_xyxy, box2_xyxy) # use torchvision0.3
             max_iou, max_index = iou.max(0)
             max_index = max_index.data.cuda()
             coord_response_mask[i + max_index] = 1
