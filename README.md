@@ -36,3 +36,4 @@ voc的数据格式是xml，转换为txt，转换代码在data目录下。定义Y
 ## Todo
 - [ ] 训练
 - [ ] 评估函数
+- [ ] 多GPU训练（采用torch1.0的distribute取代DataPal）
