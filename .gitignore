@@ -115,3 +115,6 @@ test_images
 test_images/
 log
 log/
+
+# config
+config.py
