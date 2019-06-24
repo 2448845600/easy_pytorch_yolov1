@@ -19,6 +19,8 @@ def train():
 
     print("==============================\n网络结构  开始 \n==============================")
     yolo = YOLO()
+    if conf.gpu_num.__len__() > 1:
+        yolo = torch.nn.DataParallel(yolo, device_ids=conf.gpu_num)
     print("----------\n网络结构  加载预训练模型\n----------")
     if conf.load_model_path:
         yolo.load_state_dict(torch.load(conf.load_model_path, map_location=lambda storage, loc: storage))

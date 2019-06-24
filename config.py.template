@@ -14,6 +14,7 @@ class DefaultConfig():
     use_gpu = True  # user GPU or not
     num_workers = 4  # how many workers for loading data  加载数据时的线程
     print_freq = 20  # print info every N batch
+    gpu_num = [0, 1] # used gpuds' id
 
     # load_model_path =None  # 加载预训练的模型的路径，为None代表不加载
     best_test_loss_model_path = '/home/smile/cv/easy_pytorch_yolov1/checkpoint/yolo_val_best.pth'
